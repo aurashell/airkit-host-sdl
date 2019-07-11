@@ -77,6 +77,8 @@ extern "C" {
 
     void run(AKApi* api) {
       while (running) {
+        if (!api->cb_work(api))
+          break;
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
           switch (e.type) {
@@ -93,14 +95,17 @@ extern "C" {
               }
               break;
             case SDL_QUIT:
+              api->cb_quit_requested(api);
               break;
             default:
               break;
           }
         }
-        if (!api->cb_work(api, api->userdata))
-          break;
       }
+    }
+
+    void quit(AKApi* api) {
+      running = false;
     }
   };
 
@@ -128,6 +133,10 @@ extern "C" {
     return ((AKHostSDL*) api->hostdata)->run(api);
   }
 
+  static void aksdl_quit(AKApi* api) {
+    return ((AKHostSDL*) api->hostdata)->quit(api);
+  }
+
   void ak_host_init_api(AKApi* api) {
     AKHostSDL* h = new AKHostSDL();
     api->hostdata = (void*) h;
@@ -138,6 +147,7 @@ extern "C" {
     api->mt_flush = aksdl_flush;
     api->mt_title = aksdl_title;
     api->mt_run = aksdl_run;
+    api->mt_quit = aksdl_quit;
   }
 
 }
