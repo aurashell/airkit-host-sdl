@@ -61,7 +61,7 @@ extern "C" {
       free(api);
     }
 
-    void prepare(AKApi* api, int* dw, int* dh) {
+    void prepare(AKApi* api) {
       glClearColor(1, 1, 1, 1);
       glClearStencil(0);
       glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -112,8 +112,8 @@ extern "C" {
     return ((AKHostSDL*) api->hostdata)->shutdown(api);
   }
 
-  static void aksdl_prepare(AKApi* api, int* dw, int* dh) {
-    return ((AKHostSDL*) api->hostdata)->prepare(api, dw, dh);
+  static void aksdl_prepare(AKApi* api) {
+    return ((AKHostSDL*) api->hostdata)->prepare(api);
   }
 
   static void aksdl_flush(AKApi* api) {
