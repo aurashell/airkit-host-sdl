@@ -62,9 +62,6 @@ extern "C" {
     }
 
     void prepare(AKApi* api, int* dw, int* dh) {
-      SDL_GL_GetDrawableSize(win, dw, dh);
-
-      glViewport(0, 0, *dw, *dh);
       glClearColor(1, 1, 1, 1);
       glClearStencil(0);
       glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -80,7 +77,29 @@ extern "C" {
 
     void run(AKApi* api) {
       while (running) {
-        api->cb_work(api, api->userdata);
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+          switch (e.type) {
+            case SDL_WINDOWEVENT:
+              {
+                SDL_WindowEvent* we = (SDL_WindowEvent*) &e;
+                switch (we->event) {
+                  case SDL_WINDOWEVENT_RESIZED:
+                    api->cb_resize(api, we->data1, we->data2);
+                    break;
+                  default:
+                    break;
+                }
+              }
+              break;
+            case SDL_QUIT:
+              break;
+            default:
+              break;
+          }
+        }
+        if (!api->cb_work(api, api->userdata))
+          break;
       }
     }
   };
