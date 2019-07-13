@@ -86,17 +86,65 @@ extern "C" {
               {
                 SDL_WindowEvent* we = (SDL_WindowEvent*) &e;
                 switch (we->event) {
-                  case SDL_WINDOWEVENT_RESIZED:
+                case SDL_WINDOWEVENT_RESIZED:
+                  if (api->cb_resize != NULL)
                     api->cb_resize(api, we->data1, we->data2);
-                    break;
-                  default:
-                    break;
+                  break;
+                case SDL_WINDOWEVENT_FOCUS_GAINED:
+                  if (api->cb_focus_changed != NULL)
+                    api->cb_focus_changed(api, true);
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                  if (api->cb_focus_changed != NULL)
+                    api->cb_focus_changed(api, false);
+                default:
+                  break;
                 }
               }
               break;
             case SDL_QUIT:
               api->cb_quit_requested(api);
               break;
+            case SDL_MOUSEMOTION:
+              {
+                SDL_MouseMotionEvent* me = (SDL_MouseMotionEvent*) &e;
+                api->cx = me->x;
+                api->cy = me->y;
+                if (api->cb_cursor_move != NULL)
+                  api->cb_cursor_move(api, me->x, me->y);
+              }
+              break;
+            case SDL_MOUSEBUTTONDOWN:
+              {
+                SDL_MouseButtonEvent* be = (SDL_MouseButtonEvent*) &e;
+                AKMouseButton btn;
+                if (be->button == SDL_BUTTON_LEFT) {
+                  btn = AK_MOUSE_BUTTON_LEFT;
+                } else if (be->button == SDL_BUTTON_MIDDLE) {
+                  btn = AK_MOUSE_BUTTON_MIDDLE;
+                } else if (be->button == SDL_BUTTON_RIGHT) {
+                  btn = AK_MOUSE_BUTTON_RIGHT;
+                } else {
+                  break;
+                }
+                if (api->cb_cursor_press != NULL)
+                  api->cb_cursor_press(api, btn, be->x, be->y);
+              }
+            case SDL_MOUSEBUTTONUP:
+              {
+                SDL_MouseButtonEvent* be = (SDL_MouseButtonEvent*) &e;
+                AKMouseButton btn;
+                if (be->button == SDL_BUTTON_LEFT) {
+                  btn = AK_MOUSE_BUTTON_LEFT;
+                } else if (be->button == SDL_BUTTON_MIDDLE) {
+                  btn = AK_MOUSE_BUTTON_MIDDLE;
+                } else if (be->button == SDL_BUTTON_RIGHT) {
+                  btn = AK_MOUSE_BUTTON_RIGHT;
+                } else {
+                  break;
+                }
+                if (api->cb_cursor_press != NULL)
+                  api->cb_cursor_release(api, btn, be->x, be->y);
+              }
             default:
               break;
           }
